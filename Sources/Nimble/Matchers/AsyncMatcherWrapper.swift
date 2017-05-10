@@ -22,9 +22,7 @@ fileprivate func async<T>(style: ExpectationStyle, predicate: Predicate<T>, time
                 return lastPredicateResult!.toBoolean(expectation: style)
         }
         switch result {
-        case .completed: return lastPredicateResult!
-        case .timedOut:
-            return PredicateResult(status: lastPredicateResult!.status, message: lastPredicateResult!.message)
+        case .completed, .timedOut: return lastPredicateResult!
         case let .errorThrown(error):
             return PredicateResult(status: .fail, message: .fail("unexpected error thrown: <\(error)>"))
         case let .raisedException(exception):
