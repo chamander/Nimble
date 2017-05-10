@@ -22,7 +22,11 @@ func failsWithErrorMessage(_ messages: [String], file: FileString = #file, line:
             }
         }
 
-        if foundFailureMessage {
+        // The assertion only _truly_ resulted in the failure
+        // if the 'lastFailure' was _not_ a 'success'
+        // __AND__
+        // a matching failure message was found in the assertions.
+        if foundFailureMessage, let lastFailure = lastFailure, !lastFailure.success {
             continue
         }
 
@@ -34,9 +38,18 @@ func failsWithErrorMessage(_ messages: [String], file: FileString = #file, line:
         }
 
         let message: String
-        if let lastFailure = lastFailure {
+
+        // If the 'lastFailure' was not a success (as expected),
+        // but the message was _not_ found, then this failure-assertion has
+        // failed because the errors don't match.
+        if let lastFailure = lastFailure, !lastFailure.success {
             message = "Got failure message: \"\(lastFailure.message.stringValue)\", but expected \"\(msg)\""
         } else {
+
+            // In all other cases, this means that a failure was expected,
+            // but a failure message was not provided.
+            // (Potentially because the assertion did _not_ fail,
+            // and, instead, actually passed)
             message = "expected failure message, but got none"
         }
         NimbleAssertionHandler.assert(false,
